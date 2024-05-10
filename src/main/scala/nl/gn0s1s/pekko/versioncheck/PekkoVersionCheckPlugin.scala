@@ -10,7 +10,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   override def trigger = allRequirements
 
   object autoImport {
-    val checkPekkoModuleVersions = taskKey[PekkoVersionReport]("Check that all Pekko modules have the same version")
+    val pekkoVersionCheck = taskKey[PekkoVersionReport]("Check that all Pekko modules have the same version")
   }
 
   import autoImport._
@@ -18,7 +18,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   override lazy val globalSettings = Seq()
 
   override lazy val projectSettings = Seq(
-    checkPekkoModuleVersions := checkModuleVersions(updateFull.value, streams.value.log)
+    pekkoVersionCheck := checkModuleVersions(updateFull.value, streams.value.log)
   )
 
   private val coreModules      = Set(
