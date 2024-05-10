@@ -2,7 +2,6 @@ package nl.gn0s1s.pekko.versioncheck
 
 import sbt._
 import sbt.Keys._
-import sbt.plugins.JvmPlugin
 
 object PekkoVersionCheckPlugin extends AutoPlugin {
   case class PekkoVersionReport(pekkoVersion: Option[VersionNumber], pekkoHttpVersion: Option[VersionNumber])
