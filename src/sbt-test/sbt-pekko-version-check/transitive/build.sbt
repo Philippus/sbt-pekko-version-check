@@ -13,5 +13,5 @@ TaskKey[Unit]("check") := {
   val lastLog: File = BuiltinCommands.lastLogFile(state.value).get
   val last: String  = IO.read(lastLog)
   if (!last.contains("Transitive dependencies from [org.apache.pekko"))
-    sys.error("expected warning logging in the log")
+    sys.error("expected mention of transitive dependencies")
 }
