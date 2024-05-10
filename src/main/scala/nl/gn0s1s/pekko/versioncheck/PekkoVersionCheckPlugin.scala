@@ -4,7 +4,11 @@ import sbt._
 import sbt.Keys._
 
 object PekkoVersionCheckPlugin extends AutoPlugin {
-  case class PekkoVersionReport(pekkoVersion: Option[VersionNumber], pekkoHttpVersion: Option[VersionNumber])
+  case class PekkoVersionReport(
+      pekkoVersion: Option[VersionNumber],
+      pekkoHttpVersion: Option[VersionNumber],
+      pekkoManagementVersion: Option[VersionNumber]
+  )
 
   override def trigger = allRequirements
 
@@ -28,7 +32,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     )
   )
 
-  private val coreModules      = Set(
+  private val coreModules            = Set(
     "pekko",
     "pekko-actor",
     "pekko-actor-testkit-typed",
@@ -61,7 +65,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     "pekko-stream-typed",
     "pekko-testkit"
   )
-  private val pekkoHttpModules = Set(
+  private val pekkoHttpModules       = Set(
     "pekko-http",
     "pekko-http-caching",
     "pekko-http-core",
@@ -75,12 +79,25 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     "pekko-http2-support",
     "pekko-parsing"
   )
+  private val pekkoManagementModules = Set(
+    "pekko-discovery-consul",
+    "pekko-discovery-aws-api",
+    "pekko-discovery-marathon-api",
+    "pekko-discovery-aws-api-async",
+    "pekko-discovery-kubernetes-api",
+    "pekko-lease-kubernetes",
+    "pekko-management",
+    "pekko-management-cluster-bootstrap",
+    "pekko-management-cluster-http"
+  )
 
   private sealed trait Group
 
   private case object Pekko extends Group
 
   private case object PekkoHttp extends Group
+
+  private case object PekkoManagement extends Group
 
   private case object Others extends Group
 
@@ -90,20 +107,24 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       failBuildOnNonMatchingVersions: Boolean
   ): PekkoVersionReport = {
     log.info("Checking Pekko module versions")
-    val allModules       = updateReport.allModules
-    val grouped          = allModules.groupBy(m =>
+    val allModules             = updateReport.allModules
+    val grouped                = allModules.groupBy(m =>
       if (m.organization == "org.apache.pekko") {
         val nameWithoutScalaV = m.name.dropRight(5)
         if (coreModules(nameWithoutScalaV)) Pekko
         else if (pekkoHttpModules(nameWithoutScalaV)) PekkoHttp
+        else if (pekkoManagementModules(nameWithoutScalaV)) PekkoManagement
         else Others
       }
     )
-    val pekkoVersion     = grouped.get(Pekko)
+    val pekkoVersion           = grouped.get(Pekko)
       .flatMap(verifyVersions("Pekko", _, updateReport, log, failBuildOnNonMatchingVersions))
       .map(VersionNumber.apply)
-    val pekkoHttpVersion = grouped.get(PekkoHttp)
+    val pekkoHttpVersion       = grouped.get(PekkoHttp)
       .flatMap(verifyVersions("Pekko HTTP", _, updateReport, log, failBuildOnNonMatchingVersions)
+        .map(VersionNumber.apply))
+    val pekkoManagementVersion = grouped.get(PekkoManagement)
+      .flatMap(verifyVersions("Pekko Management", _, updateReport, log, failBuildOnNonMatchingVersions)
         .map(VersionNumber.apply))
 
     (pekkoVersion, pekkoHttpVersion) match {
@@ -112,7 +133,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       case _                                => // whatever
     }
     // FIXME is it useful to verify more inter-project dependencies Pekko vs Pekko Persistence Cassandra etc.
-    PekkoVersionReport(pekkoVersion, pekkoHttpVersion)
+    PekkoVersionReport(pekkoVersion, pekkoHttpVersion, pekkoManagementVersion)
   }
 
   private def verifyVersions(
