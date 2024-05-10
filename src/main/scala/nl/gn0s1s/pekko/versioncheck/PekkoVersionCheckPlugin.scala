@@ -132,7 +132,6 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
         verifyPekkoHttpPekkoRequirement(pekkoV, pekkoHttpV)
       case _                                => // whatever
     }
-    // FIXME is it useful to verify more inter-project dependencies Pekko vs Pekko Persistence Cassandra etc.
     PekkoVersionReport(pekkoVersion, pekkoHttpVersion, pekkoManagementVersion)
   }
 
