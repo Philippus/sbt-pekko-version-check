@@ -127,11 +127,6 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       .flatMap(verifyVersions("Pekko Management", _, updateReport, log, failBuildOnNonMatchingVersions)
         .map(VersionNumber.apply))
 
-    (pekkoVersion, pekkoHttpVersion) match {
-      case (Some(pekkoV), Some(pekkoHttpV)) =>
-        verifyPekkoHttpPekkoRequirement(pekkoV, pekkoHttpV)
-      case _                                => // whatever
-    }
     PekkoVersionReport(pekkoVersion, pekkoHttpVersion, pekkoManagementVersion)
   }
 
@@ -180,9 +175,5 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       throw NonMatchingVersionsException
     }
     result
-  }
-
-  private def verifyPekkoHttpPekkoRequirement(pekkoHttpVersion: VersionNumber, pekkoVersion: VersionNumber): Unit = {
-    // everything is OK as far as we know
   }
 }
