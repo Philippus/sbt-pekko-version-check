@@ -11,7 +11,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   object autoImport {
     lazy val pekkoVersionCheckFailBuildOnNonMatchingVersions =
       settingKey[Boolean]("Sets whether non-matching module versions fail the build")
-    val pekkoVersionCheck = taskKey[PekkoVersionReport]("Check that all Pekko modules have the same version")
+    val pekkoVersionCheck                                    = taskKey[PekkoVersionReport]("Check that all Pekko modules have the same version")
   }
 
   import autoImport._
@@ -21,10 +21,14 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   )
 
   override lazy val projectSettings = Seq(
-    pekkoVersionCheck := checkModuleVersions(updateFull.value, streams.value.log, pekkoVersionCheckFailBuildOnNonMatchingVersions.value)
+    pekkoVersionCheck := checkModuleVersions(
+      updateFull.value,
+      streams.value.log,
+      pekkoVersionCheckFailBuildOnNonMatchingVersions.value
+    )
   )
 
-  private val coreModules = Set(
+  private val coreModules      = Set(
     "pekko",
     "pekko-actor",
     "pekko-actor-testkit-typed",
@@ -80,10 +84,14 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
 
   private case object Others extends Group
 
-  private def checkModuleVersions(updateReport: UpdateReport, log: Logger, failBuildOnNonMatchingVersions: Boolean): PekkoVersionReport = {
+  private def checkModuleVersions(
+      updateReport: UpdateReport,
+      log: Logger,
+      failBuildOnNonMatchingVersions: Boolean
+  ): PekkoVersionReport = {
     log.info("Checking Pekko module versions")
-    val allModules = updateReport.allModules
-    val grouped = allModules.groupBy(m =>
+    val allModules       = updateReport.allModules
+    val grouped          = allModules.groupBy(m =>
       if (m.organization == "org.apache.pekko") {
         val nameWithoutScalaV = m.name.dropRight(5)
         if (coreModules(nameWithoutScalaV)) Pekko
@@ -91,7 +99,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
         else Others
       }
     )
-    val pekkoVersion = grouped.get(Pekko)
+    val pekkoVersion     = grouped.get(Pekko)
       .flatMap(verifyVersions("Pekko", _, updateReport, log, failBuildOnNonMatchingVersions))
       .map(VersionNumber.apply)
     val pekkoHttpVersion = grouped.get(PekkoHttp)
@@ -101,44 +109,51 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     (pekkoVersion, pekkoHttpVersion) match {
       case (Some(pekkoV), Some(pekkoHttpV)) =>
         verifyPekkoHttpPekkoRequirement(pekkoV, pekkoHttpV)
-      case _ => // whatever
+      case _                                => // whatever
     }
     // FIXME is it useful to verify more inter-project dependencies Pekko vs Pekko Persistence Cassandra etc.
     PekkoVersionReport(pekkoVersion, pekkoHttpVersion)
   }
 
-  private def verifyVersions(project: String, modules: Seq[ModuleID], updateReport: UpdateReport, log: Logger, failBuildOnNonMatchingVersions: Boolean): Option[String] = {
+  private def verifyVersions(
+      project: String,
+      modules: Seq[ModuleID],
+      updateReport: UpdateReport,
+      log: Logger,
+      failBuildOnNonMatchingVersions: Boolean
+  ): Option[String] = {
     var throwOnNonMatchingVersions = false
 
     val result = modules.foldLeft(None: Option[String]) { (prev, module) =>
       prev match {
         case Some(version) =>
           if (module.revision != version) {
-            val allModules = updateReport.configurations.flatMap(_.modules)
+            val allModules   = updateReport.configurations.flatMap(_.modules)
             val moduleReport = allModules.find(r =>
               r.module.organization == module.organization && r.module.name == module.name
             )
-            val tsText = moduleReport match {
+            val tsText       = moduleReport match {
               case Some(report) =>
                 s"Transitive dependencies from ${report.callers.mkString("[", ", ", "]")}"
-              case None =>
+              case None         =>
                 ""
             }
             if (failBuildOnNonMatchingVersions) {
               throwOnNonMatchingVersions = true
               log.error(
                 s"""| Non-matching $project module versions, previously seen version $version, but module ${module.name} has version ${module.revision}.
-                    | $tsText""".stripMargin.trim)
-            }
-            else {
+                    | $tsText""".stripMargin.trim
+              )
+            } else {
               log.warn(
                 s"""| Non-matching $project module versions, previously seen version $version, but module ${module.name} has version ${module.revision}.
-                    | $tsText""".stripMargin.trim)
+                    | $tsText""".stripMargin.trim
+              )
 
             }
             Some(version)
           } else Some(version)
-        case None => Some(module.revision)
+        case None          => Some(module.revision)
       }
     }
     if (throwOnNonMatchingVersions) {
@@ -146,7 +161,6 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     }
     result
   }
-
 
   private def verifyPekkoHttpPekkoRequirement(pekkoHttpVersion: VersionNumber, pekkoVersion: VersionNumber): Unit = {
     // everything is OK as far as we know
