@@ -1,4 +1,4 @@
-package com.markatta.pekko.sbtvc
+package nl.gn0s1s.pekko.versioncheck
 
 import sbt._
 import sbt.Keys._

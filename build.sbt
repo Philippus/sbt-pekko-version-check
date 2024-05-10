@@ -22,6 +22,10 @@ enablePlugins(SbtPlugin)
 sbtPlugin                     := true
 pluginCrossBuild / sbtVersion := "1.10.0" // minimum version we target
 
+Compile / packageBin / packageOptions += Package.ManifestAttributes(
+  "Automatic-Module-Name" -> "nl.gn0s1s.pekko.versioncheck"
+)
+
 scriptedLaunchOpts := {
   scriptedLaunchOpts.value ++ Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
 }
