@@ -79,21 +79,17 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     val grouped          = allModules.groupBy(m =>
       if (m.organization == "org.apache.pekko") {
         val nameWithoutScalaV = m.name.dropRight(5)
-        log.info(nameWithoutScalaV)
         if (coreModules(nameWithoutScalaV)) Pekko
         else if (pekkoHttpModules(nameWithoutScalaV)) PekkoHttp
         else Others
       }
     )
-    log.info(grouped.toString)
     val pekkoVersion     = grouped.get(Pekko)
       .flatMap(verifyVersions("Pekko", _, updateReport))
       .map(VersionNumber.apply)
-    log.info(pekkoVersion.toString)
     val pekkoHttpVersion = grouped.get(PekkoHttp)
       .flatMap(verifyVersions("Pekko HTTP", _, updateReport)
         .map(VersionNumber.apply))
-    log.info(pekkoHttpVersion.toString)
 
     (pekkoVersion, pekkoHttpVersion) match {
       case (Some(pekkoV), Some(pekkoHttpV)) =>
