@@ -7,6 +7,8 @@ libraryDependencies ++= Seq(
   "io.altoo" %% "pekko-kryo-serialization" % "1.2.0"
 )
 
+pekkoVersionCheckFailBuildOnNonMatchingVersions := true
+
 TaskKey[Unit]("check") := {
   val lastLog: File = BuiltinCommands.lastLogFile(state.value).get
   val last: String  = IO.read(lastLog)

@@ -8,7 +8,7 @@ libraryDependencies ++= Seq(
   "org.apache.pekko" %% "pekko-testkit" % "1.0.1",
 )
 
-pekkoVersionCheckFailBuildOnNonMatchingVersions := true
+pekkoVersionCheckFailBuildOnNonMatchingVersions := false
 
 TaskKey[Unit]("check") := {
   val lastLog: File = BuiltinCommands.lastLogFile(state.value).get
