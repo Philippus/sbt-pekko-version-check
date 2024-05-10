@@ -10,7 +10,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
 
   object autoImport {
     lazy val pekkoVersionCheckFailBuildOnNonMatchingVersions =
-      settingKey[Boolean]("Sets whether non matching module versions fail the build")
+      settingKey[Boolean]("Sets whether non-matching module versions fail the build")
     val pekkoVersionCheck = taskKey[PekkoVersionReport]("Check that all Pekko modules have the same version")
   }
 
@@ -127,12 +127,12 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
             if (failBuildOnNonMatchingVersions) {
               throwOnNonMatchingVersions = true
               log.error(
-                s"""| Non matching $project module versions, previously seen version $version, but module ${module.name} has version ${module.revision}.
+                s"""| Non-matching $project module versions, previously seen version $version, but module ${module.name} has version ${module.revision}.
                     | $tsText""".stripMargin.trim)
             }
             else {
               log.warn(
-                s"""| Non matching $project module versions, previously seen version $version, but module ${module.name} has version ${module.revision}.
+                s"""| Non-matching $project module versions, previously seen version $version, but module ${module.name} has version ${module.revision}.
                     | $tsText""".stripMargin.trim)
 
             }

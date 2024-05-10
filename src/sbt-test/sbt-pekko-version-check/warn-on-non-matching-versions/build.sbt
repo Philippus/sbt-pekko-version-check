@@ -13,6 +13,6 @@ pekkoVersionCheckFailBuildOnNonMatchingVersions := false
 TaskKey[Unit]("check") := {
   val lastLog: File = BuiltinCommands.lastLogFile(state.value).get
   val last: String  = IO.read(lastLog)
-  if (!last.contains("Non matching Pekko module versions"))
+  if (!last.contains("Non-matching Pekko module versions"))
     sys.error("expected warning logging in the log")
 }
