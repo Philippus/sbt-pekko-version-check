@@ -4,12 +4,10 @@ import sbt._
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 
-case class PekkoVersionReport(pekkoVersion: Option[VersionNumber], pekkoHttpVersion: Option[VersionNumber])
-
 object PekkoVersionCheckPlugin extends AutoPlugin {
+  case class PekkoVersionReport(pekkoVersion: Option[VersionNumber], pekkoHttpVersion: Option[VersionNumber])
 
-  override def trigger  = allRequirements
-  override def requires = JvmPlugin
+  override def trigger = allRequirements
 
   object autoImport {
     val checkPekkoModuleVersions = taskKey[PekkoVersionReport]("Check that all Pekko modules have the same version")
@@ -17,13 +15,11 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
 
   import autoImport._
 
+  override lazy val globalSettings = Seq()
+
   override lazy val projectSettings = Seq(
     checkPekkoModuleVersions := checkModuleVersions(updateFull.value, streams.value.log)
   )
-
-  override lazy val buildSettings = Seq()
-
-  override lazy val globalSettings = Seq()
 
   private val coreModules      = Set(
     "pekko",
@@ -78,7 +74,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   private case object PekkoHttp extends Group
   private case object Others    extends Group
 
-  def checkModuleVersions(updateReport: UpdateReport, log: Logger): PekkoVersionReport = {
+  private def checkModuleVersions(updateReport: UpdateReport, log: Logger): PekkoVersionReport = {
     log.info("Checking Pekko module versions")
     val allModules       = updateReport.allModules
     val grouped          = allModules.groupBy(m =>
