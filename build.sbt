@@ -1,6 +1,6 @@
-name := """sbt-pekko-version-check"""
-organization := "nl.gn0s1s"
-homepage := Some(url("https://github.com/philippus/sbt-pekko-version-check"))
+name                     := """sbt-pekko-version-check"""
+organization             := "nl.gn0s1s"
+homepage                 := Some(url("https://github.com/philippus/sbt-pekko-version-check"))
 licenses += "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")
 developers += Developer(
   "johanandren",
@@ -9,12 +9,11 @@ developers += Developer(
   url("https://github.com/johanandren")
 )
 
-
 initialCommands in console := """import com.markatta.akka.sbtvc._"""
 
 enablePlugins(SbtPlugin)
 
-crossScalaVersions := Seq("2.12.19")
+crossScalaVersions            := Seq("2.12.19")
 pluginCrossBuild / sbtVersion := {
   scalaBinaryVersion.value match {
     case "2.12" => "1.9.7" // set minimum sbt version
@@ -24,7 +23,6 @@ pluginCrossBuild / sbtVersion := {
 // set up 'scripted; sbt plugin for testing sbt plugins
 scriptedLaunchOpts ++=
   Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
-
 
 //// Customise sbt-dynver's behaviour to make it work with tags which aren't v-prefixed
 //ThisBuild / dynverVTagPrefix := true
