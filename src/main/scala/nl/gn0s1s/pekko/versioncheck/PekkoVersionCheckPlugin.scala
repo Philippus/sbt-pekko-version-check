@@ -32,7 +32,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     )
   )
 
-  private val coreModules            = Set(
+  private val pekkoModules           = Set(
     "pekko",
     "pekko-actor",
     "pekko-actor-testkit-typed",
@@ -111,7 +111,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     val grouped                = allModules.groupBy(m =>
       if (m.organization == "org.apache.pekko") {
         val nameWithoutScalaV = m.name.dropRight(5)
-        if (coreModules(nameWithoutScalaV)) Pekko
+        if (pekkoModules(nameWithoutScalaV)) Pekko
         else if (pekkoHttpModules(nameWithoutScalaV)) PekkoHttp
         else if (pekkoManagementModules(nameWithoutScalaV)) PekkoManagement
         else Others
