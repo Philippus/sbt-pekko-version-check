@@ -1,10 +1,10 @@
-version := "0.1"
-scalaVersion := "2.12.19"
+version      := "0.1"
+scalaVersion := "2.13.14"
 
 // direct dependency mismatch
 libraryDependencies ++= Seq(
   "org.apache.pekko" %% "pekko-protobuf-v3" % "1.0.0",
-  "org.apache.pekko" %% "pekko-testkit" % "1.0.1",
+  "org.apache.pekko" %% "pekko-testkit"     % "1.0.1"
 )
 
 pekkoVersionCheckFailBuildOnNonMatchingVersions := true
