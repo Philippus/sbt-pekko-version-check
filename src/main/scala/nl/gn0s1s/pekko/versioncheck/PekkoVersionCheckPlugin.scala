@@ -101,8 +101,8 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       failBuildOnNonMatchingVersions: Boolean
   ) = {
     log.info("Checking Pekko module versions")
-    val allModules = updateReport.allModules
-    val grouped    = allModules.groupBy(m =>
+    val allModules        = updateReport.allModules
+    val grouped           = allModules.groupBy(m =>
       if (m.organization == "org.apache.pekko") {
         val nameWithoutScalaV = m.name.dropRight(5)
         if (pekkoModules(nameWithoutScalaV)) Pekko
@@ -111,9 +111,13 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
         else Others
       }
     )
-    grouped.get(Pekko).foreach(verifyVersions("Pekko", _, log, failBuildOnNonMatchingVersions))
-    grouped.get(PekkoHttp).foreach(verifyVersions("Pekko HTTP", _, log, failBuildOnNonMatchingVersions))
-    grouped.get(PekkoManagement).foreach(verifyVersions("Pekko Management", _, log, failBuildOnNonMatchingVersions))
+    val pekkoOk           = grouped.get(Pekko).forall(verifyVersions("Pekko", _, log, failBuildOnNonMatchingVersions))
+    val pekkoHttpOk       =
+      grouped.get(PekkoHttp).forall(verifyVersions("Pekko HTTP", _, log, failBuildOnNonMatchingVersions))
+    val pekkoManagementOk =
+      grouped.get(PekkoManagement).forall(verifyVersions("Pekko Management", _, log, failBuildOnNonMatchingVersions))
+    if (failBuildOnNonMatchingVersions && (!pekkoOk || !pekkoHttpOk || !pekkoManagementOk))
+      throw NonMatchingVersionsException
   }
 
   private def verifyVersions(
@@ -121,7 +125,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       modules: Seq[ModuleID],
       log: Logger,
       failBuildOnNonMatchingVersions: Boolean
-  ): Unit = {
+  ): Boolean = {
     val highestRevision = modules.maxBy(_.revision).revision
     val toBeUpdated     = modules.filter(_.revision != highestRevision).sortBy(_.revision).map(_.name.dropRight(5))
     if (toBeUpdated.nonEmpty) {
@@ -141,9 +145,10 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
 
       if (failBuildOnNonMatchingVersions) {
         log.error(report)
-        throw NonMatchingVersionsException
       } else
         log.warn(report)
-    }
+      false
+    } else
+      true
   }
 }
