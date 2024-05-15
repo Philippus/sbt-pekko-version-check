@@ -5,9 +5,10 @@
 [![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat "Apache 2.0")](LICENSE)
 
-This plugin can verify that the Apache Pekko module versions of a project match. You can use it also as part of your
-build chain and make the build fail if non-matching versions are found. This project started as a fork of
-[sbt-akka-version-check](https://github.com/johanandren/sbt-akka-version-check).
+This plugin can verify that the Apache Pekko module versions of a project match. Pekko also does this verification
+itself, but the advantage is that this check can run before running any (integration) tests or running your application
+in production. You can use it also as part of your build chain and make the build fail if non-matching versions are
+found. This project started as a fork of [sbt-akka-version-check](https://github.com/johanandren/sbt-akka-version-check).
 
 ## Installation
 
