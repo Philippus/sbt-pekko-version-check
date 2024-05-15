@@ -11,6 +11,6 @@ pekkoVersionCheckFailBuildOnNonMatchingVersions := true
 TaskKey[Unit]("check") := {
   val lastLog: File = BuiltinCommands.lastLogFile(state.value).get
   val last: String  = IO.read(lastLog)
-  if (!last.contains("Transitive dependencies from [org.apache.pekko"))
-    sys.error("expected mention of transitive dependencies")
+  if (!last.contains("You are using version 1.0.2 of Pekko, but"))
+    sys.error("expected mention of non-matching Pekko module versions")
 }

@@ -4,18 +4,12 @@ import sbt._
 import sbt.Keys._
 
 object PekkoVersionCheckPlugin extends AutoPlugin {
-  case class PekkoVersionReport(
-      pekkoVersion: Option[VersionNumber],
-      pekkoHttpVersion: Option[VersionNumber],
-      pekkoManagementVersion: Option[VersionNumber]
-  )
-
   override def trigger = allRequirements
 
   object autoImport {
     lazy val pekkoVersionCheckFailBuildOnNonMatchingVersions =
       settingKey[Boolean]("Sets whether non-matching module versions fail the build")
-    val pekkoVersionCheck                                    = taskKey[PekkoVersionReport]("Check that all Pekko modules have the same version")
+    val pekkoVersionCheck                                    = taskKey[Unit]("Check that all Pekko modules have the same version")
   }
 
   import autoImport._
@@ -105,10 +99,10 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       updateReport: UpdateReport,
       log: Logger,
       failBuildOnNonMatchingVersions: Boolean
-  ): PekkoVersionReport = {
+  ) = {
     log.info("Checking Pekko module versions")
-    val allModules             = updateReport.allModules
-    val grouped                = allModules.groupBy(m =>
+    val allModules        = updateReport.allModules
+    val grouped           = allModules.groupBy(m =>
       if (m.organization == "org.apache.pekko") {
         val nameWithoutScalaV = m.name.dropRight(5)
         if (pekkoModules(nameWithoutScalaV)) Pekko
@@ -117,63 +111,44 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
         else Others
       }
     )
-    val pekkoVersion           = grouped.get(Pekko)
-      .flatMap(verifyVersions("Pekko", _, updateReport, log, failBuildOnNonMatchingVersions))
-      .map(VersionNumber.apply)
-    val pekkoHttpVersion       = grouped.get(PekkoHttp)
-      .flatMap(verifyVersions("Pekko HTTP", _, updateReport, log, failBuildOnNonMatchingVersions)
-        .map(VersionNumber.apply))
-    val pekkoManagementVersion = grouped.get(PekkoManagement)
-      .flatMap(verifyVersions("Pekko Management", _, updateReport, log, failBuildOnNonMatchingVersions)
-        .map(VersionNumber.apply))
-
-    PekkoVersionReport(pekkoVersion, pekkoHttpVersion, pekkoManagementVersion)
+    val pekkoOk           = grouped.get(Pekko).forall(verifyVersions("Pekko", _, log, failBuildOnNonMatchingVersions))
+    val pekkoHttpOk       =
+      grouped.get(PekkoHttp).forall(verifyVersions("Pekko HTTP", _, log, failBuildOnNonMatchingVersions))
+    val pekkoManagementOk =
+      grouped.get(PekkoManagement).forall(verifyVersions("Pekko Management", _, log, failBuildOnNonMatchingVersions))
+    if (failBuildOnNonMatchingVersions && (!pekkoOk || !pekkoHttpOk || !pekkoManagementOk))
+      throw NonMatchingVersionsException
   }
 
   private def verifyVersions(
       project: String,
       modules: Seq[ModuleID],
-      updateReport: UpdateReport,
       log: Logger,
       failBuildOnNonMatchingVersions: Boolean
-  ): Option[String] = {
-    var throwOnNonMatchingVersions = false
+  ): Boolean = {
+    val highestRevision = modules.maxBy(_.revision).revision
+    val toBeUpdated     = modules.filter(_.revision != highestRevision).sortBy(_.revision).map(_.name.dropRight(5))
+    if (toBeUpdated.nonEmpty) {
+      val groupedByVersion = modules
+        .groupBy(_.revision)
+        .toSeq
+        .sortBy(_._1)
+        .map { case (k, v) => k -> v.sortBy(_.name).map(_.name.dropRight(5)).mkString("[", ", ", "]") }
+        .map { case (k, v) => s"($k, $v)" }
+        .mkString(", ")
+      val report           = s"You are using version $highestRevision of $project, but it appears " +
+        s"you (perhaps indirectly) also depend on older versions of related artifacts. " +
+        s"You can solve this by adding an explicit dependency on version $highestRevision " +
+        s"of the [${toBeUpdated.mkString(", ")}] artifacts to your project. " +
+        s"Here's a complete collection of detected artifacts: $groupedByVersion. " +
+        "See also: https://pekko.apache.org/docs/pekko/current/common/binary-compatibility-rules.html#mixed-versioning-is-not-allowed"
 
-    val result = modules.foldLeft(None: Option[String]) { (prev, module) =>
-      prev match {
-        case Some(version) =>
-          if (module.revision != version) {
-            val allModules   = updateReport.configurations.flatMap(_.modules)
-            val moduleReport = allModules.find(r =>
-              r.module.organization == module.organization && r.module.name == module.name
-            )
-            val tsText       = moduleReport match {
-              case Some(report) =>
-                s"Transitive dependencies from ${report.callers.mkString("[", ", ", "]")}"
-              case None         =>
-                ""
-            }
-            if (failBuildOnNonMatchingVersions) {
-              throwOnNonMatchingVersions = true
-              log.error(
-                s"""| Non-matching $project module versions, previously seen version $version, but module ${module.name} has version ${module.revision}.
-                    | $tsText""".stripMargin.trim
-              )
-            } else {
-              log.warn(
-                s"""| Non-matching $project module versions, previously seen version $version, but module ${module.name} has version ${module.revision}.
-                    | $tsText""".stripMargin.trim
-              )
-
-            }
-            Some(version)
-          } else Some(version)
-        case None          => Some(module.revision)
-      }
-    }
-    if (throwOnNonMatchingVersions) {
-      throw NonMatchingVersionsException
-    }
-    result
+      if (failBuildOnNonMatchingVersions) {
+        log.error(report)
+      } else
+        log.warn(report)
+      false
+    } else
+      true
   }
 }
