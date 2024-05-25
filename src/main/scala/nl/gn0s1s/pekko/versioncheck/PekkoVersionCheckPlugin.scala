@@ -126,14 +126,14 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       log: Logger,
       failBuildOnNonMatchingVersions: Boolean
   ): Boolean = {
-    val highestRevision = modules.maxBy(_.revision).revision
-    val toBeUpdated     = modules.filter(_.revision != highestRevision).sortBy(_.revision).map(_.name.dropRight(5))
+    val highestRevision = modules.maxBy(m => Version(m.revision)).revision
+    val toBeUpdated     = modules.collect { case m if m.revision != highestRevision => m.name.dropRight(5) }.sorted
     if (toBeUpdated.nonEmpty) {
       val groupedByVersion = modules
         .groupBy(_.revision)
         .toSeq
-        .sortBy(_._1)
-        .map { case (k, v) => k -> v.sortBy(_.name).map(_.name.dropRight(5)).mkString("[", ", ", "]") }
+        .sortBy(r => Version(r._1))
+        .map { case (k, v) => k -> v.map(_.name.dropRight(5)).sorted.mkString("[", ", ", "]") }
         .map { case (k, v) => s"($k, $v)" }
         .mkString(", ")
       val report           = s"You are using version $highestRevision of $project, but it appears " +
