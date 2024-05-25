@@ -116,6 +116,12 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       grouped.get(PekkoHttp).forall(verifyVersions("Pekko HTTP", _, log, failBuildOnNonMatchingVersions))
     val pekkoManagementOk =
       grouped.get(PekkoManagement).forall(verifyVersions("Pekko Management", _, log, failBuildOnNonMatchingVersions))
+
+    for {
+      pekkoVersion     <- grouped.get(Pekko).flatMap(_.map(m => Version(m.revision)).sorted.lastOption)
+      pekkoVersionHttp <- grouped.get(PekkoHttp).flatMap(_.map(m => Version(m.revision)).sorted.lastOption)
+    } yield verifyPekkoHttpPekkoRequirement(pekkoVersion, pekkoVersionHttp, log)
+
     if (failBuildOnNonMatchingVersions && (!pekkoOk || !pekkoHttpOk || !pekkoManagementOk))
       throw NonMatchingVersionsException
   }
@@ -150,5 +156,12 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       false
     } else
       true
+  }
+
+  private def verifyPekkoHttpPekkoRequirement(pekkoVersion: Version, pekkoHttpVersion: Version, log: Logger): Unit = {
+    if (pekkoHttpVersion.version.startsWith("1.1.") && pekkoVersion.version.startsWith("1.0."))
+      log.warn("It is strongly recommended that you avoid using Pekko 1.0.x artifacts with this release, you should " +
+        "use Pekko 1.1.x artifacts where possible. Problems running with Pekko 1.0.x artifacts aren't expected, but " +
+        "Pekko HTTP 1.1 is built with Pekko 1.1.")
   }
 }
