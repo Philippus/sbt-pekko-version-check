@@ -143,9 +143,9 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
         s"Here's a complete collection of detected artifacts: $groupedByVersion. " +
         "See also: https://pekko.apache.org/docs/pekko/current/common/binary-compatibility-rules.html#mixed-versioning-is-not-allowed"
 
-      if (failBuildOnNonMatchingVersions) {
+      if (failBuildOnNonMatchingVersions)
         log.error(report)
-      } else
+      else
         log.warn(report)
       false
     } else
