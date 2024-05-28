@@ -126,9 +126,9 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       log: Logger,
       failBuildOnNonMatchingVersions: Boolean
   ): Boolean = {
-    val highestRevision = modules.maxBy(m => Version(m.revision)).revision
-    val toBeUpdated     = modules.collect { case m if m.revision != highestRevision => m.name.dropRight(5) }.sorted
-    if (toBeUpdated.nonEmpty) {
+    val modulesLatestRevision = modules.maxBy(m => Version(m.revision)).revision
+    val modulesTobeUpdated     = modules.collect { case m if m.revision != modulesLatestRevision => m.name.dropRight(5) }.sorted
+    if (modulesTobeUpdated.nonEmpty) {
       val groupedByVersion = modules
         .groupBy(_.revision)
         .toSeq
@@ -136,19 +136,18 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
         .map { case (k, v) => k -> v.map(_.name.dropRight(5)).sorted.mkString("[", ", ", "]") }
         .map { case (k, v) => s"($k, $v)" }
         .mkString(", ")
-      val report           = s"You are using version $highestRevision of $project, but it appears " +
+      val report           = s"You are using version $modulesLatestRevision of $project, but it appears " +
         s"you (perhaps indirectly) also depend on older versions of related artifacts. " +
-        s"You can solve this by adding an explicit dependency on version $highestRevision " +
-        s"of the [${toBeUpdated.mkString(", ")}] artifacts to your project. " +
+        s"You can solve this by adding an explicit dependency on version $modulesLatestRevision " +
+        s"of the [${modulesTobeUpdated.mkString(", ")}] artifacts to your project. " +
         s"Here's a complete collection of detected artifacts: $groupedByVersion. " +
         "See also: https://pekko.apache.org/docs/pekko/current/common/binary-compatibility-rules.html#mixed-versioning-is-not-allowed"
 
-      if (failBuildOnNonMatchingVersions) {
+      if (failBuildOnNonMatchingVersions)
         log.error(report)
-      } else
+      else
         log.warn(report)
-      false
-    } else
-      true
+    }
+    modulesTobeUpdated.isEmpty
   }
 }
