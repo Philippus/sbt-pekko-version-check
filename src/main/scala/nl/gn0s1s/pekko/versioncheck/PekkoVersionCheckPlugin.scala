@@ -147,8 +147,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
         log.error(report)
       else
         log.warn(report)
-      false
-    } else
-      true
+    }
+    modulesTobeUpdated.isEmpty
   }
 }
