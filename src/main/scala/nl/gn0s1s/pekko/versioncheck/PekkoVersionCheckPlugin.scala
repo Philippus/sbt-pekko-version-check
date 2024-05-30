@@ -69,6 +69,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     "pekko-http-root",
     "pekko-http-spray-json",
     "pekko-http-testkit",
+    "pekko-http-testkit-munit",
     "pekko-http-xml",
     "pekko-http2-support",
     "pekko-parsing"
