@@ -19,7 +19,6 @@ developers   := List(
 )
 
 enablePlugins(SbtPlugin)
-sbtPlugin                     := true
 pluginCrossBuild / sbtVersion := "1.10.0" // minimum version we target
 
 Compile / packageBin / packageOptions += Package.ManifestAttributes(
