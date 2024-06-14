@@ -134,7 +134,8 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       failBuildOnNonMatchingVersions: Boolean
   ): Boolean = {
     val modulesLatestRevision = modules.maxBy(m => Version(m.revision)).revision
-    val modulesTobeUpdated     = modules.collect { case m if m.revision != modulesLatestRevision => m.name.dropRight(5) }.sorted
+    val modulesTobeUpdated    =
+      modules.collect { case m if m.revision != modulesLatestRevision => m.name.dropRight(5) }.sorted
     if (modulesTobeUpdated.nonEmpty) {
       val groupedByVersion = modules
         .groupBy(_.revision)
