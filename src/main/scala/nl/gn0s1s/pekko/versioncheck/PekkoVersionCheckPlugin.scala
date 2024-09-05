@@ -134,7 +134,8 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
       failBuildOnNonMatchingVersions: Boolean
   ): Boolean = {
     val modulesLatestRevision = modules.maxBy(m => Version(m.revision)).revision
-    val modulesTobeUpdated     = modules.collect { case m if m.revision != modulesLatestRevision => m.name.dropRight(5) }.sorted
+    val modulesTobeUpdated    =
+      modules.collect { case m if m.revision != modulesLatestRevision => m.name.dropRight(5) }.sorted
     if (modulesTobeUpdated.nonEmpty) {
       val groupedByVersion = modules
         .groupBy(_.revision)
@@ -160,8 +161,10 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
 
   private def verifyPekkoHttpPekkoRequirement(pekkoVersion: Version, pekkoHttpVersion: Version, log: Logger): Unit = {
     if (pekkoHttpVersion.version.startsWith("1.1.") && pekkoVersion.version.startsWith("1.0."))
-      log.warn("It is strongly recommended that you avoid using Pekko 1.0.x artifacts with Pekko HTTP 1.1.x, you should " +
-        "use Pekko 1.1.x artifacts where possible. Problems running with Pekko 1.0.x artifacts aren't expected, but " +
-        "Pekko HTTP 1.1 is built with Pekko 1.1.")
+      log.warn(
+        "It is strongly recommended that you avoid using Pekko 1.0.x artifacts with Pekko HTTP 1.1.x, you should " +
+          "use Pekko 1.1.x artifacts where possible. Problems running with Pekko 1.0.x artifacts aren't expected, but " +
+          "Pekko HTTP 1.1 is built with Pekko 1.1."
+      )
   }
 }
