@@ -103,15 +103,15 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   ) = {
     log.info("Checking Pekko module versions")
     val allModules        = updateReport.allModules
-    val grouped           = allModules.groupBy(m =>
-      if (m.organization == "org.apache.pekko") {
+    val grouped           = allModules
+      .filter(_.organization == "org.apache.pekko")
+      .groupBy { m =>
         val nameWithoutScalaV = m.name.dropRight(5)
         if (pekkoModules(nameWithoutScalaV)) Pekko
         else if (pekkoHttpModules(nameWithoutScalaV)) PekkoHttp
         else if (pekkoManagementModules(nameWithoutScalaV)) PekkoManagement
         else Others
       }
-    )
     val pekkoOk           = grouped.get(Pekko).forall(verifyVersions("Pekko", _, log, failBuildOnNonMatchingVersions))
     val pekkoHttpOk       =
       grouped.get(PekkoHttp).forall(verifyVersions("Pekko HTTP", _, log, failBuildOnNonMatchingVersions))
