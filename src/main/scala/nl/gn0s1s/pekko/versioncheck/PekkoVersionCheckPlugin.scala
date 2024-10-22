@@ -96,6 +96,9 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
 
   private case object Others extends Group
 
+  private def moduleNameWithoutScalaVersion(m: ModuleID): String =
+    m.name.stripSuffix("_2.12").stripSuffix("_2.13").stripSuffix("_3")
+
   private def checkModuleVersions(
       updateReport: UpdateReport,
       log: Logger,
@@ -106,10 +109,9 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     val grouped           = allModules
       .filter(_.organization == "org.apache.pekko")
       .groupBy { m =>
-        val nameWithoutScalaV = m.name.dropRight(5)
-        if (pekkoModules(nameWithoutScalaV)) Pekko
-        else if (pekkoHttpModules(nameWithoutScalaV)) PekkoHttp
-        else if (pekkoManagementModules(nameWithoutScalaV)) PekkoManagement
+        if (pekkoModules(moduleNameWithoutScalaVersion(m))) Pekko
+        else if (pekkoHttpModules(moduleNameWithoutScalaVersion(m))) PekkoHttp
+        else if (pekkoManagementModules(moduleNameWithoutScalaVersion(m))) PekkoManagement
         else Others
       }
     val pekkoOk           = grouped.get(Pekko).forall(verifyVersions("Pekko", _, log, failBuildOnNonMatchingVersions))
@@ -135,13 +137,13 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   ): Boolean = {
     val modulesLatestRevision = modules.maxBy(m => Version(m.revision)).revision
     val modulesTobeUpdated    =
-      modules.collect { case m if m.revision != modulesLatestRevision => m.name.dropRight(5) }.sorted
+      modules.collect { case m if m.revision != modulesLatestRevision => moduleNameWithoutScalaVersion(m) }.sorted
     if (modulesTobeUpdated.nonEmpty) {
       val groupedByVersion = modules
         .groupBy(_.revision)
         .toSeq
         .sortBy(r => Version(r._1))
-        .map { case (k, v) => k -> v.map(_.name.dropRight(5)).sorted.mkString("[", ", ", "]") }
+        .map { case (k, v) => k -> v.map(moduleNameWithoutScalaVersion).sorted.mkString("[", ", ", "]") }
         .map { case (k, v) => s"($k, $v)" }
         .mkString(", ")
       val report           = s"You are using version $modulesLatestRevision of $project, but it appears " +
