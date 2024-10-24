@@ -97,7 +97,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   private case object Others extends Group
 
   private def moduleNameWithoutScalaVersion(m: ModuleID): String =
-    m.name.stripSuffix("_2.12").stripSuffix("_2.13").stripSuffix("_3")
+    m.name.replaceFirst("(_2\\.\\d\\d|_3)$", "")
 
   private def checkModuleVersions(
       updateReport: UpdateReport,
