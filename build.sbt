@@ -19,7 +19,16 @@ developers   := List(
 )
 
 enablePlugins(SbtPlugin)
-pluginCrossBuild / sbtVersion := "1.10.0" // minimum version we target
+
+scalaVersion := "2.12.20"
+crossScalaVersions += "3.3.4"
+
+pluginCrossBuild / sbtVersion := {
+  scalaBinaryVersion.value match {
+    case "2.12" => "1.10.0"
+    case _      => "2.0.0-M2"
+  }
+}
 
 Compile / packageBin / packageOptions += Package.ManifestAttributes(
   "Automatic-Module-Name" -> "nl.gn0s1s.pekko.versioncheck"
