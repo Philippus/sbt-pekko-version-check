@@ -122,8 +122,8 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
 
     for {
       pekkoVersion     <- grouped.get(Pekko).flatMap(_.map(m => Version(m.revision)).sorted.lastOption)
-      pekkoVersionHttp <- grouped.get(PekkoHttp).flatMap(_.map(m => Version(m.revision)).sorted.lastOption)
-    } yield verifyPekkoHttpPekkoRequirement(pekkoVersion, pekkoVersionHttp, log)
+      pekkoHttpVersion <- grouped.get(PekkoHttp).flatMap(_.map(m => Version(m.revision)).sorted.lastOption)
+    } yield verifyPekkoHttpPekkoRequirement(pekkoVersion, pekkoHttpVersion, log)
 
     if (failBuildOnNonMatchingVersions && !(pekkoOk && pekkoHttpOk && pekkoManagementOk))
       throw NonMatchingVersionsException
