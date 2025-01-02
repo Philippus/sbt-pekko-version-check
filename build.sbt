@@ -21,12 +21,12 @@ developers   := List(
 enablePlugins(SbtPlugin)
 
 scalaVersion := "2.12.20"
-crossScalaVersions += "3.3.4"
+crossScalaVersions += "3.6.2"
 
 pluginCrossBuild / sbtVersion := {
   scalaBinaryVersion.value match {
     case "2.12" => "1.10.0"
-    case _      => "2.0.0-M2"
+    case _      => "2.0.0-M3"
   }
 }
 
