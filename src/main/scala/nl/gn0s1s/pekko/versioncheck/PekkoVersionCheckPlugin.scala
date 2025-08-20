@@ -18,13 +18,18 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     pekkoVersionCheckFailBuildOnNonMatchingVersions := false
   )
 
-  override lazy val projectSettings = Seq(
-    pekkoVersionCheck := checkModuleVersions(
-      updateFull.value,
-      streams.value.log,
-      pekkoVersionCheckFailBuildOnNonMatchingVersions.value
+  override lazy val projectSettings = {
+    import nl.gn0s1s.pekko.versioncheck.Compat._
+    Seq(
+      pekkoVersionCheck := Def.uncached {
+        checkModuleVersions(
+          updateFull.value,
+          streams.value.log,
+          pekkoVersionCheckFailBuildOnNonMatchingVersions.value
+        )
+      }
     )
-  )
+  }
 
   private val pekkoModules           = Set(
     "pekko",
