@@ -19,7 +19,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   )
 
   override lazy val projectSettings = {
-    import nl.gn0s1s.pekko.versioncheck.Compat._
+    import sbtcompat.PluginCompat._
     Seq(
       pekkoVersionCheck := Def.uncached {
         checkModuleVersions(
