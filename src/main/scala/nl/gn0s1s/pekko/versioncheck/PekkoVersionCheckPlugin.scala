@@ -9,7 +9,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   object autoImport {
     lazy val pekkoVersionCheckFailBuildOnNonMatchingVersions =
       settingKey[Boolean]("Sets whether non-matching module versions fail the build")
-    val pekkoVersionCheck                                    = taskKey[Unit]("Check that all Pekko modules have the same version")
+    @transient val pekkoVersionCheck                         = taskKey[Unit]("Check that all Pekko modules have the same version")
   }
 
   import autoImport._
@@ -19,15 +19,13 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   )
 
   override lazy val projectSettings = {
-    import sbtcompat.PluginCompat._
     Seq(
-      pekkoVersionCheck := Def.uncached {
+      pekkoVersionCheck :=
         checkModuleVersions(
           updateFull.value,
           streams.value.log,
           pekkoVersionCheckFailBuildOnNonMatchingVersions.value
         )
-      }
     )
   }
 
