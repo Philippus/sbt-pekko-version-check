@@ -140,7 +140,9 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
   ): Boolean = {
     val modulesLatestRevision = modules.maxBy(m => Version(m.revision)).revision
     val modulesTobeUpdated    =
-      modules.collect { case m if m.revision != modulesLatestRevision => moduleNameWithoutScalaVersion(m) }.sorted
+      modules.collect {
+        case m if m.revision != modulesLatestRevision => moduleNameWithoutScalaVersion(m)
+      }.distinct.sorted
     if (modulesTobeUpdated.nonEmpty) {
       val groupedByVersion = modules
         .groupBy(_.revision)
