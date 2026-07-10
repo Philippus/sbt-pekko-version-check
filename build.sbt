@@ -20,8 +20,8 @@ developers   := List(
 
 enablePlugins(SbtPlugin)
 
-scalaVersion := "2.12.21"
-crossScalaVersions += "3.8.4"
+scalaVersion := "3.8.4"
+crossScalaVersions += "2.12.21"
 
 scalacOptions ++= {
   scalaBinaryVersion.value match {
