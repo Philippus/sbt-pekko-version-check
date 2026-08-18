@@ -129,7 +129,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     } yield verifyPekkoHttpPekkoRequirement(pekkoVersion, pekkoHttpVersion, log)
 
     if (failBuildOnNonMatchingVersions && !(pekkoOk && pekkoHttpOk && pekkoManagementOk))
-      throw NonMatchingVersionsException
+      throw NonMatchingVersionsException()
   }
 
   private def verifyVersions(
