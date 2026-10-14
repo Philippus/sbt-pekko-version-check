@@ -20,7 +20,7 @@ developers   := List(
 
 enablePlugins(SbtPlugin)
 
-scalaVersion := "3.8.4"
+scalaVersion := "3.10.0"
 crossScalaVersions += "2.12.21"
 
 scalacOptions ++= {
