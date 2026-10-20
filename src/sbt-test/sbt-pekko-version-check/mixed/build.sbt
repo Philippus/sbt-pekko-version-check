@@ -10,7 +10,10 @@ libraryDependencies ++= Seq(
 
 pekkoVersionCheckFailBuildOnNonMatchingVersions := true
 
-TaskKey[Unit]("check") := {
+@transient
+lazy val check = taskKey[Unit]("Check the previous task's log")
+
+check := {
   val lastLog: File = BuiltinCommands.lastLogFile(state.value).get
   val last: String  = IO.read(lastLog)
   if (
