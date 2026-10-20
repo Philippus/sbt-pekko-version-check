@@ -22,7 +22,7 @@ object PekkoVersionCheckPlugin extends AutoPlugin {
     Seq(
       pekkoVersionCheck :=
         checkModuleVersions(
-          updateFull.value,
+          update.value,
           streams.value.log,
           pekkoVersionCheckFailBuildOnNonMatchingVersions.value
         )
