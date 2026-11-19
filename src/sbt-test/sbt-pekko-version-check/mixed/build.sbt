@@ -14,8 +14,11 @@ pekkoVersionCheckFailBuildOnNonMatchingVersions := true
 lazy val check = taskKey[Unit]("Check the previous task's log")
 
 check := {
-  val lastLog: File = BuiltinCommands.lastLogFile(state.value).get
-  val last: String  = IO.read(lastLog)
+  val taskStreams = (pekkoVersionCheck / streams).value
+  val reader = taskStreams.readText(taskStreams.key)
+  val last: String =
+    try Iterator.continually(reader.readLine()).takeWhile(_ != null).mkString("\n")
+    finally reader.close()
   if (
     !last.contains("You are using version 1.0.1 of Pekko, but") || !last.contains(
       "You are using version 1.0.1 of Pekko HTTP, but"
