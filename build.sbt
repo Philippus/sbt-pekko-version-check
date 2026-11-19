@@ -41,8 +41,6 @@ Compile / packageBin / packageOptions += Package.ManifestAttributes(
   "Automatic-Module-Name" -> "nl.gn0s1s.pekko.versioncheck"
 )
 
-scriptedSbt := (if (scalaBinaryVersion.value == "2.12") "1.13.1" else "2.1.0")
-
 scriptedLaunchOpts := {
   scriptedLaunchOpts.value ++ Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
 }
