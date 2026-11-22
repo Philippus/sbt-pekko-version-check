@@ -21,7 +21,7 @@ developers   := List(
 enablePlugins(SbtPlugin)
 
 scalaVersion       := "3.9.0"
-crossScalaVersions := Seq("3.9.0", "2.12.21")
+crossScalaVersions += "2.12.21"
 
 scalacOptions ++= {
   scalaBinaryVersion.value match {
